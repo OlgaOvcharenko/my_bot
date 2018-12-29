@@ -30,18 +30,6 @@ class BotHandler:
         return last_update
 
 
-def get_weather(app_id, location):
-        try:
-            res = requests.get(" http://api.openweathermap.org/data/2.5/weather?q={0}&APPID={1}"
-                               .format(location, app_id))
-            data = res.json()
-            return "Conditions: {}\nTemperature: {}"\
-                .format(data['weather'][0]['description'], data['main']['temp'] - 273.15)
-        except Exception as e:
-            pass
-            # print("Exception (weather):", e)
-
-
 def greet():
     new_offset = None
     month, today, hour = now.month, now.day, now.hour
@@ -55,15 +43,15 @@ def greet():
     last_chat_name = last_update['message']['chat']['first_name']
 
     if today == now.day and 6 <= hour < 12:
-        greet_bot.send_message(last_chat_id, 'Доброе утро,  {}'.format(last_chat_name))
+        greet_bot.send_message(last_chat_id, 'Good morning,  {}'.format(last_chat_name))
         today += 1
     elif today == now.day and 12 <= hour < 17:
-        greet_bot.send_message(last_chat_id, 'Добрый день, {}'.format(last_chat_name))
+        greet_bot.send_message(last_chat_id, 'Good afternoon, {}'.format(last_chat_name))
         today += 1
     elif today == now.day and 17 <= hour < 23:
-        greet_bot.send_message(last_chat_id, 'Добрый вечер,  {}'.format(last_chat_name))
+        greet_bot.send_message(last_chat_id, 'Good evening,  {}'.format(last_chat_name))
         today += 1
-    greet_bot.send_message(last_chat_id, 'Где посмотреть погоду (odessa,ua)?')
+    greet_bot.send_message(last_chat_id, 'Enter location like odessa,ua')
     new_offset = last_update_id + 1
     while True:
         greet_bot.get_updates(new_offset)
@@ -85,12 +73,23 @@ def get_location():
     greet_bot.send_message(last_chat_id, weather_info)
 
 
+def get_weather(app_id, location):
+        try:
+            res = requests.get(" http://api.openweathermap.org/data/2.5/weather?q={0}&APPID={1}"
+                               .format(location, app_id))
+            data = res.json()
+            return "Weather conditions: {}\nTemperature: {}"\
+                .format(data['weather'][0]['description'], data['main']['temp'] - 273.15)
+        except Exception as e:
+            print("Exception (weather):", e)
+            return "Location not found!"
+
+
 if __name__ == '__main__':
     greet_bot = BotHandler('792677523:AAHCAsRplF1zxwEBShZBWPClLi5sl5X6k9I')
     now = datetime.datetime.now()
 
     try:
         greet()
-        # get_location()
     except KeyboardInterrupt:
         exit()
